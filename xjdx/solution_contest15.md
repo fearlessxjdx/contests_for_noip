@@ -168,8 +168,8 @@ int main()
 ### Problem description
 > 给你一个图，以及三种类型的边
 >> 1. 普通的u->v; 
-2. u->range[l,r]中任意一点都可以
-3. 3.range[l,r]->u 
+>> 2. u->range[l,r]中任意一点都可以
+>> 3. range[l,r]->u 
 > 求出s到每个点的最短路
 ### Data Limit：n <= 1e5 ， ss <=1e5 ， M<=1E5  Time Limit: 2s
 ### Solution
