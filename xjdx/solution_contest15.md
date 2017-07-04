@@ -10,25 +10,23 @@
 根据gcd可知，|x|<=K*max(|a|,|c|),而这题a,b,c,d的范围都很小所以可以用暴力法.
 + 法一：暴力枚举，用一个布尔数组记录一下就好了。
 + 法二：**exgcd**\
-已知方程*ax+by=1*,若gcd(a,b)=1,则原方程可写成\
+已知方程ax+by=1,若gcd(a,b)=1,则原方程可写成\
 *ax+by=gcd(a,b)*.\
- 设 *bx'+(a%b)y'=gcd(b,a%b)*（由辗转相除法得)\
- 因为 *a%b=a-[a/b]\*b* (`[]`为取整符号）\
- 则 *bx'+(a-[a/b]\*b)y'=gcd(b,a%b)*\
- 即 *ay'+b(x'-[a/b]\*b)=gcd(b,a%b)=gcd(a,b)=ax*by*\
- 所以 x=y',y=x'-[a/b]\*b\
- **回到原题**
-
+而 gcd(a,b)=gcd(b,a mod b)\
+所以 ax+by=gcd(a,b)=gcd(b,a mod b)=bx'+(a mod b)y'\
+即 ax+by=bx'+(a mod b)y'=bx'+(a-[a/b]\*b)y'\
+移项得 ax+by=ay'+b(x'-[a/b]\*b)\
+根据恒等定理有 x=y',y=x'-[a/b]\*b\
+由于欧几里德算法最后一步为gcd(d,0)=d,此时对应的等式的解为x=1,y=0,因此只要如上述代码,从gcd(d,0)往前处理,在进行欧几里德算法的递归的时候根据相邻两次调用间x,y和x’,y’的关系计算即可求出ax+by=gcd(a,b)的解.\
+ **回到原题**\
  本题相当于求 *ax+b=cy+d* x,y的自然数解。\
  即*ax+(-c)y=d-b*.\
  设gcd(a,-c)=g\
- 所以可以求出(a/g)x+(-c/g)y=1的解，再扩大(d-b)/g倍（若(d-b)/g不为整数，则无解），再调整解，使其为最小整数解。 
+ 所以可以求出(a/g)x+(-c/g)y=1的解，再扩大(d-b)/g倍（若(d-b)/g不为整数，则无解），再调整解，使其为最小整数解。 \
+ 实际上在之前的计算和证明中我们得到的只是不定方程的一组解,那么怎样得到所有解呢?对于一般形式ax+by=c有通解x′=x+kb,y′=y−ka(k为任意整数).(证明略,只要代入一下就知道为什么通解是这个了)
 ### Code
 ```cpp
 方法一：
-#include<iostream>
-#include<cstdio>
-using namespace std;
 bool map[500000];
 int main()
 {
@@ -42,49 +40,49 @@ int main()
 }
 
 方法二：
-#include<bits/stdc++.h>
-using namespace std;
-int extgcd(int a,int b,int &x,int &y)
-{
-	if (b==0)
-	{
-		x=1; y=0; return a;
+int exgcd(int a,int b,int &x,int &y){
+	int d=a;
+	if (b!=0){
+		d=exgcd(b,a%b,x,y);
+		x-=(int(a/b))*y;
+		swap(x,y);
+	}else{
+		x=a*1;y=0;
 	}
-	int ans = extgcd(b,a%b,x,y);
-	int temp = x;
-	x = y;
-	y = temp-a/b*y;
-	return ans;
+	return d;
 }
-int main()
-{
-	int a,b,c,d,x,y;
+int gcd(int a,int b){
+	return b==0?a:gcd(b,a%b);
+}
+int main(){
+	int a,b,c,d;
 	scanf("%d%d%d%d",&a,&b,&c,&d);
-	int g = extgcd(a,-c,x,y);
-	if ((d-b)%g!=0)
-	{
-		puts("-1");
+	int x,y;
+	if (b==d) {
+		printf("%d",b);
+		return 0;
 	}
-	else
-	{
-		x*=(d-b)/g; y*=(d-b)/g;
-		int flag = g <0? -1 : 1;
-		while (x<0||y<0) 
-		{
-			x -= flag *(-c/g);
-			y += flag *(a/g);
-		}
-		while (x+flag*(-c/g)>=0&&y-flag*(a/g)>=0)
-		{
-			x+=flag*(-c/g); y-=flag*(a/g);
-		}
-		printf("%d\n",x*a+b);
+	int k=gcd(a,c);
+	int g=d-b;
+	int A=a,C=c;
+	if (g%k==0){
+		A/=k;C/=k;g/=k;
 	}
-	return 0;
+	if ((abs(exgcd(A,-C,x,y)))==1){
+		//printf("%d  %d  ",x,y);
+		x*=g;y*=g;
+		while (x<0||y<0){
+			x+=C;y+=A;
+		}
+		while (x-C>=0&&y-A>=0){
+			x-=C;y-=A;
+		}
+		//printf("%d  %d  ",x,y);
+		printf("%d",b+a*x);
+	}else printf("-1");  
 }
 ```
 *****
-
 
 ## B
 ### Problem description
