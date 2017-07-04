@@ -170,7 +170,7 @@ int main()
 >> 1. 普通的u->v; 
 >> 2. u->range[l,r]中任意一点都可以
 >> 3. range[l,r]->u \
-> 求出s到每个点的最短路
+求出s到每个点的最短路
 ### Data Limit：n <= 1e5 ， ss <=1e5 ， M<=1E5  Time Limit: 2s
 ### Solution
 > 如果我们暴力建边，显然不可做，那么我们应该怎么做呢？</P>
