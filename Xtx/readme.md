@@ -6,8 +6,8 @@
 
 \# |  A  |  B  |  C  |  D  |  E  |  F  |  G  
 ---|---|---|---|---|---|---|---
-|contest8 |Y|Y|Y|A|Y|A|W
-|contest9 |Y|Y|Y|Y|A|X|X
+|contest8 |Y|Y|Y|Y|A|A|W
+|contest9 |Y|Y|A|A|A|X|X
 |contest10|Y|Y|Y|A|A|X|X
 |contest11|Y|Y|Y|Y|A|X|X
 |contest12|Y|A|Y|Y|W|A|W
