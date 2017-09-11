@@ -1,6 +1,6 @@
-[比赛链接](http://codeforces.com/contest/787/)
+[比赛链接](https://vjudge.net/contest/168929)
 
-TODO:E
+[Origin](http://codeforces.com/contest/787)
 
 # 比赛中解决的问题
 ## A
@@ -263,13 +263,161 @@ int main(){
 *****
 ## E TODO:
 ### Problem description
-
-### Data Limit：n <= 1e5  Time Limit: 2s
-
+给你n个数，问在不破坏序列的情况下,最少能把这n个数分成几段，且每段中不同的个数小于等于k个，输出k从1到n的答案。
+### Data Limit： 1<=n<=1e5  Time Limit: 2s
 ### Solution
+#### 解法一:
+首先考虑暴力的方法，每次询问k，暴力扫一遍区间，一直到一段连续的区间充满了k个不同的数后，又要加入一个新的数的时候，再划分出一个新的区间。
 
+这样是O(n^2)的。
 
+但是呢，答案相对于k来讲是有单调性的，而且在很多情况下，一段连续的k对应着同一个答案。
+
+所以就可以二分了，对于l,r，如果k=l以及k=r时的答案相等，l<=k<=r的答案就都相等。
+#### 解法二:
+枚举 + 线段树
+假设位置为0->n-1, 每个位置i保存一个i到n - 1的线段树,线段树的叶子表示某个位置是否有数,每个数只保存最左边的一个出现位置，每次查询从P位置往后找len个不同的数
+的时候只需要在P->n的线段树上二分找最远的一个位置就好了。
+由于对于某个len，答案是不超过n / len 的，所以总次数是n/1 + n/2 + .. n/n,这是个调和级数，总量为nlogn 所以如下的枚举Query次数最多只有nlogn次，复杂度为nlogn^2
 ### Code
+#### 解法一:
 ```c++
+inline int get(int x)
+{
+	memset(col,0,sizeof(col));
+	int cnt=0,ans=1;
+	for(int i=1;i<=n;i++)
+	{
+		if(col[a[i]]==ans) continue;
+		cnt++;
+		col[a[i]]=ans;
+		if(cnt>x) {ans++;cnt=1;col[a[i]]=ans;}
+	}
+	return ans;
+}
+
+void solve(int l,int r)
+{
+	if(l>r) return ;
+	ans[l]=get(l),ans[r]=get(r);
+	if(ans[l]==ans[r])
+	{
+		for(int i=l+1;i<=r-1;i++)
+			ans[i]=ans[l];
+		return ; 
+	}
+	int mid=l+(r-l)/2;
+	solve(l+1,mid),solve(mid,r-1);
+	return ;
+}
+```
+#### 解法二: 
+```c++
+	for (int len = 1; len <= n; len++) {
+		int pos = 0, ret = 0;
+		while(pos < n) {
+			int next_pos = root[pos]->Query(len, 0, n - 1);
+			ret ++;
+			pos = next_pos + 1;
+		}
+	    printf("%d ", ret);
+	}
+```
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 100010;
+
+struct Tree *C;
+struct Tree {
+	Tree *lc, *rc;
+	int cnt;
+	bool left_end;
+	Tree(int l = 0, int r = 0): cnt(0),left_end(false) {
+		if(l == r) {
+			return ;
+		}
+		int m = l + r >> 1;
+		lc = new (C++) Tree(l, m);
+		rc = new (C++) Tree(m + 1, r);
+	}
+	Tree *Insert(int position, int value, int l, int r)  {
+		Tree *ta = new (C++)Tree();
+		ta->lc = lc;
+		ta->rc = rc;
+		ta->left_end = left_end;
+		ta->cnt = cnt;
+		
+		if (l == r) {
+			ta->cnt += value;
+			if(ta->cnt == 1) {
+				ta->left_end = true;
+			} else {
+				ta->left_end = false;
+			}
+			return ta;
+		}
+		int m = l + r >> 1;
+		if (position <= m) {
+			ta->lc = lc->Insert(position, value, l, m);
+		} else {
+			ta->rc = rc->Insert(position, value, m + 1, r);
+		}
+		ta->left_end = ta->lc->left_end;
+		ta->cnt = ta->lc->cnt + ta->rc->cnt;
+		return ta;
+	}
+	int Query(int k, int l, int r) {
+		if (cnt <= k) {
+			return r;
+		}
+		if (l == r) {
+			return l;
+		}
+		int m = l + r >> 1;
+		if (lc->cnt > k) {
+			return lc->Query(k, l, m);
+		} else if (lc->cnt == k){
+			if (!rc->left_end) {
+				return rc->Query(k - lc->cnt, m + 1, r);
+			} else {
+				return lc->Query(k, l, m);
+			}
+		} else {
+			return rc->Query(k - lc->cnt, m + 1, r);
+		}
+	}
+}pool[N * 40], *root[N];
+int mp[N], ret[N], a[N];
+
+int main () {
+	C = pool;
+	int n;
+	scanf("%d", &n);
+	for (int i = 0; i < n; i++) {
+		scanf("%d", &a[i]);
+	}
+	root[n] = new (C++)Tree(0, n - 1);
+	memset (mp, -1, sizeof(mp));
+	for (int i = n - 1; i >= 0; i--) {
+		if (mp[a[i]] != -1) {
+			root[i] = root[i + 1]->Insert(mp[a[i]], -1, 0, n - 1);
+			root[i] = root[i]->Insert(i, 1, 0, n - 1);
+		} else {
+			root[i] = root[i + 1]->Insert(i, 1, 0, n - 1);
+		}
+		mp[a[i]] = i;
+	}
+	for (int len = 1; len <= n; len++) {
+		int pos = 0, ret = 0;
+		while(pos < n) {
+			int next_pos = root[pos]->Query(len, 0, n - 1);
+			ret ++;
+			pos = next_pos + 1;
+		}
+	    printf("%d ", ret);
+	}
+	return 0;
+}
 
 ```

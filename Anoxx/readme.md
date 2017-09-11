@@ -23,3 +23,6 @@
 |contest13|Y|Y|Y|Y|Y|A|A
 |contest14|Y|Y|Y|A|A|X|X
 |contest15|Y|Y|Y|A|A|X|X
+|contest16|Y|Y|Y|A|A|X|X
+|contest17|Y|Y|Y|Y|A|X|X
+|contest18|Y|A|A|A|Y|X|A
